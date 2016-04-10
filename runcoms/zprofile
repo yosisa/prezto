@@ -17,9 +17,14 @@ fi
 # Editors
 #
 
-export EDITOR='nano'
-export VISUAL='nano'
+export EDITOR='vim'
+export VISUAL='vim'
 export PAGER='less'
+
+if [[ -z $SSH_CONNECTION ]] && command -v emacsclient >/dev/null; then
+  export EDITOR='emacsclient'
+  export VISUAL='emacsclient'
+fi
 
 #
 # Language
@@ -43,6 +48,10 @@ typeset -gU cdpath fpath mailpath path
 
 # Set the list of directories that Zsh searches for programs.
 path=(
+  $HOME/bin(N)
+  $GOPATH/bin(N)
+  $HOME/.pyenv/{bin,shims}(N)
+  $HOME/.ndenv/bin(N)
   /usr/local/{bin,sbin}
   $path
 )
@@ -54,7 +63,7 @@ path=(
 # Set the default Less options.
 # Mouse-wheel scrolling has been disabled by -X (disable screen clearing).
 # Remove -X and -F (exit if the content fits on one screen) to enable it.
-export LESS='-F -g -i -M -R -S -w -X -z-4'
+export LESS='-g -i -M -R -S -w -X -z-4'
 
 # Set the Less input preprocessor.
 # Try both `lesspipe` and `lesspipe.sh` as either might exist on a system.
@@ -72,3 +81,23 @@ if [[ ! -d "$TMPDIR" ]]; then
 fi
 
 TMPPREFIX="${TMPDIR%/}/zsh"
+
+if command -v direnv >/dev/null; then
+    eval "$(direnv hook zsh)"
+fi
+
+if command -v pyenv >/dev/null; then
+    eval "$(pyenv init -)"
+fi
+
+if command -v ndenv >/dev/null; then
+    eval "$(ndenv init -)"
+fi
+
+function xtime {
+  /usr/bin/time -f '%Uu %Ss %er %MkB %C' "$@"
+}
+
+if [[ -s "${ZDOTDIR:-$HOME}/.zprofile.local" ]]; then
+  source "${ZDOTDIR:-$HOME}/.zprofile.local"
+fi
